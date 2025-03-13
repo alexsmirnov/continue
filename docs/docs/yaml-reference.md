@@ -4,7 +4,7 @@ description: Reference for the Continue configuration YAML file
 keywords: [config, yaml, configuration, customize, customization]
 ---
 
-# confg.yaml Reference
+# config.yaml Reference
 
 ## Introduction
 
@@ -30,6 +30,10 @@ Assistants can either explicitly define blocks - see [Properties](#properties) b
 Hub blocks and assistants are identified with a slug in the format `owner-slug/block-or-assistant-slug`, where an owner can be a user or organization.
 
 Blocks can be imported into an assistant by adding a `uses` clause under the block type. This can be alongside other `uses` clauses or explicit blocks of that type.
+
+:::info
+Note that `uses` blocks cannot be used with a local `config.yaml`
+:::
 
 For example, the following assistant imports an Anthropic model and defines an Ollama DeepSeek one.
 
@@ -69,7 +73,7 @@ Note that hub secrets can be passed as inputs, using the a similar mustache form
 
 ### Overrides
 
-Block properties can be also be directly overriden using `overrides`. For example:
+Block properties can be also be directly overriden using `override`. For example:
 
 ```yaml title="Assistant config.yaml"
 name: myprofile/custom-assistant
@@ -78,7 +82,7 @@ models:
     with:
       ANTHROPIC_API_KEY: ${{ secrets.MY_ANTHROPIC_API_KEY }}
       TEMP: 0.9
-    overrides:
+    override:
       roles:
         - chat
 ```
@@ -134,6 +138,7 @@ The `models` section defines the language models used in your configuration. Mod
 - `provider` (**required**): The provider of the model (e.g., `openai`, `ollama`).
 - `model` (**required**): The specific model name (e.g., `gpt-4`, `starcoder`).
 - `roles`: An array specifying the roles this model can fulfill, such as `chat`, `autocomplete`, `embed`, `rerank`, `edit`, `apply`, `summarize`. The default value is `[chat, edit, apply, summarize]`. Note that the `summarize` role is not currently used.
+- `capabilities`: Array of strings denoting model capabilities, which will overwrite Continue's autodetection based on provider and model. Supported capabilities include `tool_use` and `image_input`.
 - `embedOptions`: If the model includes role `embed`, these settings apply for embeddings:
 
   - `maxChunkSize`: Maximum tokens per document chunk. Minimum is 128 tokens.
@@ -187,6 +192,17 @@ models:
     model: codestral-latest
     roles:
       - autocomplete
+
+  - name: My Model - OpenAI-Compatible
+    provider: openai
+    apiBase: http://my-endpoint/v1
+    model: my-custom-model
+    capabilities:
+      - tool_use
+      - image_input
+    roles:
+      - chat
+      - edit
 ```
 
 ---
@@ -350,7 +366,7 @@ models:
   - uses: anthropic/claude-3.5-sonnet
     with:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-    overrides:
+    override:
       defaultCompletionOptions:
         temperature: 0.8
   - name: GPT-4
@@ -435,26 +451,26 @@ model_defaults: &model_defaults
   apiBase: https://api.example.com/llm
 
 models:
-- name: mistral
-  <<: *model_defaults
-  model: mistral-7b-instruct
-  roles:
-    - chat
-    - edit
+  - name: mistral
+    <<: *model_defaults
+    model: mistral-7b-instruct
+    roles:
+      - chat
+      - edit
 
-- name: qwen2.5-coder-7b-instruct
-  <<: *model_defaults
-  model: qwen2.5-coder-7b-instruct
-  roles:
-    - chat
-    - edit
+  - name: qwen2.5-coder-7b-instruct
+    <<: *model_defaults
+    model: qwen2.5-coder-7b-instruct
+    roles:
+      - chat
+      - edit
 
-- name: qwen2.5-coder-7b
-  <<: *model_defaults
-  model: qwen2.5-coder-7b
-  useLegacyCompletionsEndpoint: false
-  roles:
-    - autocomplete
+  - name: qwen2.5-coder-7b
+    <<: *model_defaults
+    model: qwen2.5-coder-7b
+    useLegacyCompletionsEndpoint: false
+    roles:
+      - autocomplete
 ```
 
 ### Fully deprecated settings

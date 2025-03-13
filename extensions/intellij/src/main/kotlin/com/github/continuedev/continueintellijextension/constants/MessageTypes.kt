@@ -71,6 +71,8 @@ class MessageTypes {
             "getWebviewHistoryLength",
             "getCurrentSessionId",
             "docs/suggestions",
+            "didCloseFiles",
+            "didSelectOrganization"
         )
 
         // Note: If updating these values, make a corresponding update in
@@ -89,6 +91,7 @@ class MessageTypes {
             "config/getSerializedProfileInfo",
             "config/deleteModel",
             "config/listProfiles",
+            "config/refreshProfiles",
             "config/openProfile",
             "config/updateSharedConfig",
             "config/updateSelectedModel",
